@@ -6,6 +6,7 @@ use crate::sys;
 use crate::MediaPlayer;
 use crate::TrackDescription;
 use crate::tools::from_cstr;
+use libc::c_char;
 
 pub trait MediaPlayerAudioEx {
     fn get_mute(&self) -> Option<bool>;
@@ -13,6 +14,7 @@ pub trait MediaPlayerAudioEx {
     fn get_volume(&self) -> i32;
     fn set_volume(&self, volume: i32) -> Result<(), ()>;
     fn get_audio_track_description(&self) -> Option<Vec<TrackDescription>>;
+    fn set_audio_output_device(&self, module: *const c_char, device_id: *const c_char);
 }
 
 impl MediaPlayerAudioEx for MediaPlayer {
@@ -56,4 +58,10 @@ impl MediaPlayerAudioEx for MediaPlayer {
         }
     }
 
+    fn set_audio_output_device(&self, module: *const c_char, device_id: *const c_char) {
+        //NOTE: the module parameter seems to be a null pointer to get this to work
+        unsafe {
+            sys::libvlc_audio_output_device_set(self.ptr, module, device_id)
+        }
+    }
 }
